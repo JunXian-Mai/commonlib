@@ -1,11 +1,9 @@
 package org.markensic.commonlib.thread
 
-import java.io.IOException
-import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentLinkedDeque
-import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
+import java.util.concurrent.FutureTask
 import java.util.function.Consumer
 
 
@@ -16,8 +14,12 @@ class Worker(protected val executor: ExecutorService = Schedulers.io) {
     futures.add(executor.submit(runnable))
   }
 
-  fun <T> submit(callable: Callable<T>): Future<T> {
-    return executor.submit<T>(callable).also {
+  fun <T> add(runnable: () -> T) {
+    futures.add(FutureTask(runnable))
+  }
+
+  fun <T> submit(callable: () -> T): Future<T> {
+    return executor.submit(callable).also {
       futures.add(it)
     }
   }
@@ -25,7 +27,11 @@ class Worker(protected val executor: ExecutorService = Schedulers.io) {
   @Throws(Exception::class)
   fun await() {
     while (true) {
-      futures.pollFirst()?.get() ?: return
+      futures.pollFirst()?.apply {
+        if (this is FutureTask && !isDone) {
+          run()
+        }
+      }?.get() ?: return
     }
   }
 

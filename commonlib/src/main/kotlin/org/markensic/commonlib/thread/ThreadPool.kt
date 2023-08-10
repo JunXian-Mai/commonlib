@@ -8,15 +8,12 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 object ThreadPool {
-  private var mainHandlerThread: HandlerThread? = null
   private val threadPoolMap: MutableMap<String, ModifyThreadPool> = mutableMapOf()
 
   val cpuCount: Int
     get() {
       return Runtime.getRuntime().availableProcessors()
     }
-
-
 
   private fun getThreadFactory(name: String) =
     ThreadFactoryBuilder().setNameFormat("$name-%d").build()
