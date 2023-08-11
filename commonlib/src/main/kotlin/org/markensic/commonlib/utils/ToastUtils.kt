@@ -59,8 +59,6 @@ object ToastUtils {
           toast.cancel()
           if (!canceled) {
             show()
-          } else {
-            println(">>> canceled")
           }
         }, duration)
       }
